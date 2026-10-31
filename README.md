@@ -29,7 +29,7 @@
 flowchart LR
     A[interface<br/>路由 + 依赖注入] --> B[application<br/>用例编排]
     B --> C[domain<br/>实体 / 值对象 / 仓储接口]
-    D[infrastruture<br/>Tortoise / bcrypt / JWT] -.实现.-> C
+    D[infrastructure<br/>Tortoise / bcrypt / JWT] -.实现.-> C
     A --> D
 ```
 
@@ -60,7 +60,7 @@ TaskFlow/
 │   │   ├── user/commands/       # 注册、登录
 │   │   ├── user/queries/        # 订单查询
 │   │   └── order/commands/      # 创建订单
-│   ├── infrastruture/           # 基础设施层：外部依赖的具体实现
+│   ├── infrastructure/          # 基础设施层：外部依赖的具体实现
 │   │   ├── database/            # orm_models（表定义）、mappers（实体 ↔ ORM 转换）
 │   │   ├── repository/          # user_impl、order_impl
 │   │   └── security/            # bcrypt_hasher、jwt_service
@@ -128,7 +128,7 @@ aerich upgrade                        # 应用到数据库
 aerich downgrade                      # 回滚一步
 ```
 
-改动 `app/infrastruture/database/orm_models.py` 后必须走这三步，迁移脚本本身要提交到仓库——它就是数据库的版本历史。
+改动 `app/infrastructure/database/orm_models.py` 后必须走这三步，迁移脚本本身要提交到仓库——它就是数据库的版本历史。
 
 ## 设计要点
 
@@ -144,4 +144,3 @@ aerich downgrade                      # 回滚一步
 - [ ] 下单幂等（`Idempotency-Key` 去重）
 - [ ] 订单状态机（待处理 → 已支付 → 已完成 / 已取消）
 - [ ] pytest + httpx 接口测试
-- [ ] 目录 `infrastruture` → `infrastructure` 拼写修正

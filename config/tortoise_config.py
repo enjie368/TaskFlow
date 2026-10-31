@@ -14,7 +14,7 @@ TORTOISE_ORM = {
         "models": {
             "models": [
                 "aerich.models",                              # aerich 自己的版本记录表
-                "app.infrastruture.database.orm_models",      # 业务 ORM 模型
+                "app.infrastructure.database.orm_models",      # 业务 ORM 模型
             ],
             "default_connection": "default",
         },

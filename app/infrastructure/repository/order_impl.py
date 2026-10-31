@@ -1,8 +1,8 @@
 from app.domain.order.entity import Order
 from app.domain.order.repository import OrderRepository
 from app.domain.shared.vo import UserID
-from app.infrastruture.database.mappers import OrderMapper
-from app.infrastruture.database.orm_models import OrderORM
+from app.infrastructure.database.mappers import OrderMapper
+from app.infrastructure.database.orm_models import OrderORM
 
 
 class OrderRepositoryImpl(OrderRepository):

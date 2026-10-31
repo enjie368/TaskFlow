@@ -2,8 +2,8 @@ from typing import Optional
 from app.domain.shared.vo import UserID
 from app.domain.user.entity import User
 from app.domain.user.repository import UserRepository
-from app.infrastruture.database.mappers import UserMapper
-from app.infrastruture.database.orm_models import UserORM
+from app.infrastructure.database.mappers import UserMapper
+from app.infrastructure.database.orm_models import UserORM
 
 
 class UserRepositoryImpl(UserRepository):

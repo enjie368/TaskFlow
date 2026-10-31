@@ -10,12 +10,12 @@ from app.application.user.commands.register_user import RegisterUserHandler
 from app.application.user.queries.get_orders import GetOrdersHandler
 from app.domain.order.repository import OrderRepository
 from app.domain.user.repository import UserRepository
-from app.infrastruture.repository.order_impl import OrderRepositoryImpl
-from app.infrastruture.repository.user_impl import UserRepositoryImpl
+from app.infrastructure.repository.order_impl import OrderRepositoryImpl
+from app.infrastructure.repository.user_impl import UserRepositoryImpl
 from app.domain.user.password_hasher import PasswordHasher
 from app.application.common.token_service import TokenService
-from app.infrastruture.security.bcrypt_hasher import BcryptPasswordHasher
-from app.infrastruture.security.jwt_service import JwtTokenService
+from app.infrastructure.security.bcrypt_hasher import BcryptPasswordHasher
+from app.infrastructure.security.jwt_service import JwtTokenService
 from config.settings import settings
 
 def get_password_hasher() -> PasswordHasher:
