@@ -32,3 +32,8 @@ class ValidationError(DomainException):
     '''数据验证异常'''
     def __init__(self,message="数据验证失败"):
         super().__init__(message,"ValidationError")
+
+class ConflictError(DomainException):
+    '''资源状态冲突异常'''
+    def __init__(self,message="资源当前状态不允许此操作"):
+        super().__init__(message,"ConflictError")

@@ -4,10 +4,11 @@ from decimal import Decimal
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from fastapi import APIRouter,Depends,status,HTTPException,Query
-from app.application.common.exception import DomainException
+from app.application.common.exception import DomainException,ConflictError,NotFoundError
+from app.application.order.commands.cancel_order import CancelOrderHandler, CancelOrderCommand
 from app.application.order.commands.create_order import CreateOrderHandler, CreateOrderCommand
 from app.application.user.queries.get_orders import GetOrdersQuery, GetOrdersHandler
-from app.interface.dependency import get_order_handler, get_create_order_handler
+from app.interface.dependency import get_order_handler, get_create_order_handler, get_cancel_order_handler
 from app.domain.shared.vo import UserID
 from app.interface.security import get_current_user_id
 
@@ -86,5 +87,24 @@ async def create_order(
             )
         )
         return _to_order_response(order)
+    except DomainException as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
+
+@router.post("/{order_id}/cancel", response_model=OrderResponse, summary="取消订单")
+async def cancel_order(
+        order_id: int,
+        current_user_id: UserID = Depends(get_current_user_id),
+        handler: CancelOrderHandler = Depends(get_cancel_order_handler),
+):
+    '''取消当前登录用户自己的待处理订单'''
+    try:
+        order = await handler.handle(
+            CancelOrderCommand(order_id=order_id, user_id=current_user_id.value)
+        )
+        return _to_order_response(order)
+    except ConflictError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=e.message)
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
     except DomainException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)

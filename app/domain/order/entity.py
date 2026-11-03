@@ -3,9 +3,21 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
+from enum import StrEnum
 from typing import Optional
 
 from ..shared.vo import UserID
+
+
+class OrderStatus(StrEnum):
+    '''订单状态：值仍是中文，但拼错会立刻报错'''
+    PENDING = "待处理"
+    PAID = "已支付"
+    CANCELLED = "已取消"
+
+
+class OrderStatusError(Exception):
+    '''订单当前状态不允许这个操作（领域层自己的异常）'''
 
 
 @dataclass
@@ -33,7 +45,16 @@ class Order:
             order_number=f"ORD-{now:%Y%m%d}-{uuid.uuid4().hex[:8].upper()}",
             user_id=user_id,
             total_amount=total_amount.quantize(Decimal("0.01")),
-            status="待处理",
+            status=OrderStatus.PENDING,
             created_at=now,
             updated_at=now,
         )
+
+    def cancel(self) -> None:
+        '''取消订单：只有待处理可以取消，规则写在实体里'''
+        if self.status == OrderStatus.CANCELLED:
+            raise OrderStatusError("订单已取消，不能重复取消")
+        if self.status != OrderStatus.PENDING:
+            raise OrderStatusError(f"订单当前状态为「{self.status}」，不能取消")
+        self.status = OrderStatus.CANCELLED
+        self.updated_at = datetime.now()

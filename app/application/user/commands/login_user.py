@@ -3,7 +3,7 @@
 '''
 from dataclasses import dataclass
 
-from app.application.common.exception import AuthError
+from app.application.common.exception import AuthError, ValidationError
 from app.application.common.token_service import TokenService
 from app.domain.user.password_hasher import PasswordHasher
 from app.domain.user.repository import UserRepository
@@ -33,10 +33,10 @@ class LoginUserHandler:
     async def handle(self, command:LoginUserCommand)->LoginUserResult:
         '''处理用户登录命令'''
         if not command.username:
-            raise ValueError("用户名不能为空")
+            raise ValidationError("用户名不能为空")
 
         if not command.password:
-            raise ValueError("密码不能为空")
+            raise ValidationError("密码不能为空")
 
         #查找用户
         user=await self.user_repository.find_by_name(command.username)

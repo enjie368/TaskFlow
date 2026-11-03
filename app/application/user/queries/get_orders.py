@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Optional,List
 
+from app.application.common.exception import ValidationError
 from app.domain.order.repository import OrderRepository
 from app.domain.shared.vo import UserID
 
@@ -41,11 +42,11 @@ class GetOrdersHandler:
     async def handle(self,query: GetOrdersQuery) -> GetOrdersResult:
         '''处理获取用户订单查询'''
         if query.user_id <= 0:
-            raise ValueError("用户id必须大于0")
+            raise ValidationError("用户id必须大于0")
         if query.limit <= 0 or query.limit > 100:
-            raise ValueError("限制数量必读大于0且小于100")
+            raise ValidationError("限制数量必读大于0且小于100")
         if query.offset < 0:
-            raise ValueError("偏移不能为负数")
+            raise ValidationError("偏移不能为负数")
 
         user_id = UserID(query.user_id)
         orders = await self.order_repository.find_by_user_id(user_id, query.limit, query.offset)

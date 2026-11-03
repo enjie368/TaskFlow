@@ -4,6 +4,7 @@
 
 from fastapi import Depends
 
+from app.application.order.commands.cancel_order import CancelOrderHandler
 from app.application.order.commands.create_order import CreateOrderHandler
 from app.application.user.commands.login_user import LoginUserHandler
 from app.application.user.commands.register_user import RegisterUserHandler
@@ -51,7 +52,7 @@ def get_login_user_handler(
     '''获取登录用户处理器'''
     return LoginUserHandler(user_repository,hasher,token_service)
 
-def get_order_repository()->OrderRepositoryImpl:
+def get_order_repository()->OrderRepository:
     '''获取订单仓储'''
     return OrderRepositoryImpl()
 
@@ -66,3 +67,10 @@ def get_create_order_handler(
 ) -> CreateOrderHandler:
     '''获取创建订单处理器'''
     return CreateOrderHandler(order_repository)
+
+def get_cancel_order_handler(
+    order_repository: OrderRepository = Depends(get_order_repository),
+) -> CancelOrderHandler:
+    '''获取取消订单处理器'''
+    return CancelOrderHandler(order_repository)
+

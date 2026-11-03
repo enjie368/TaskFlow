@@ -1,5 +1,6 @@
 '''订单仓储接口'''
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from app.domain.shared.vo import UserID
 from .entity import Order
@@ -19,4 +20,14 @@ class OrderRepository(ABC):
     @abstractmethod
     async def add(self, order: Order) -> Order:
         '''新增订单，返回落库后的实体'''
+        pass
+
+    @abstractmethod
+    async def find_by_id_and_user_id(self, order_id: int, user_id: UserID) -> Optional[Order]:
+        '''按 id 查订单，且必须属于该用户；不存在或不是本人的都返回 None'''
+        pass
+
+    @abstractmethod
+    async def update(self, order: Order) -> Order:
+        '''把实体的变更写回数据库'''
         pass
