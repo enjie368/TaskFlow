@@ -49,22 +49,16 @@ async def register_user(
         handler:RegisterUserHandler = Depends(get_register_user_handler)
 ):
     '''用户注册接口'''
-    from app.application.common.exception import DomainException
-    try :
-        command=RegisterUserCommand(
-        username=request.username,
-        password=request.password
-        )
-        result=await handler.handle(command)
-        return RegisterResponse(
-            username=result.username,
-            user_id=result.user_id,
-            message="用户注册成功"
-        )
-    except DomainException as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="服务器内部错误")
+    command=RegisterUserCommand(
+    username=request.username,
+    password=request.password
+    )
+    result=await handler.handle(command)
+    return RegisterResponse(
+        username=result.username,
+        user_id=result.user_id,
+        message="用户注册成功"
+    )
 
 @router.post("/login", response_model=LoginResponse,status_code=status.HTTP_200_OK)
 async def login_user(
@@ -72,23 +66,18 @@ async def login_user(
         handler:LoginUserHandler=Depends(get_login_user_handler)
 ):
     '''用户登录接口'''
-    try :
-        command=LoginUserCommand(
-            username=request.username,
-            password=request.password
+    command=LoginUserCommand(
+        username=request.username,
+        password=request.password
         )
-        result=await handler.handle(command)
-        return LoginResponse(
-            username=result.username,
-            user_id=result.user_id,
-            access_token=result.access_token,
-            expires_in=result.expires_in,
-            message="用户登录成功"
+    result=await handler.handle(command)
+    return LoginResponse(
+        username=result.username,
+        user_id=result.user_id,
+        access_token=result.access_token,
+        expires_in=result.expires_in,
+        message="用户登录成功"
         )
-    except DomainException as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="服务器内部错误")
 
 @router.get("/me", response_model=MeResponse)
 async def me(current_user_id: UserID = Depends(get_current_user_id)):

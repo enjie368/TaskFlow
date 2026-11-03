@@ -58,19 +58,15 @@ async def get_orders(
         handler:GetOrdersHandler=Depends(get_order_handler)
 ):
     '''获取当前登录用户的订单列表'''
-    try:
-        query = GetOrdersQuery(user_id=current_user_id.value, limit=limit, offset=offset)
-        re=await handler.handle(query)
-        return GetOrdersResponse(
-            orders=[_to_order_response(order) for order in re.orders],
-            total=re.total,
-            limit=limit or 10,
-            offset=offset or 0,
+
+    query = GetOrdersQuery(user_id=current_user_id.value, limit=limit, offset=offset)
+    re=await handler.handle(query)
+    return GetOrdersResponse(
+        orders=[_to_order_response(order) for order in re.orders],
+        total=re.total,
+        limit=limit or 10,
+        offset=offset or 0,
         )
-    except DomainException as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="服务器内部错误")
 
 @router.post("/", response_model=OrderResponse, status_code=status.HTTP_201_CREATED, summary="创建订单")
 async def create_order(
@@ -79,16 +75,15 @@ async def create_order(
         handler: CreateOrderHandler = Depends(get_create_order_handler),
 ):
     '''创建订单：用户身份取自 token，金额取自请求体'''
-    try:
-        order = await handler.handle(
-            CreateOrderCommand(
-                user_id=current_user_id.value,
-                total_amount=payload.total_amount,
-            )
-        )
-        return _to_order_response(order)
-    except DomainException as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
+
+    order = await handler.handle(
+        CreateOrderCommand(
+            user_id=current_user_id.value,
+            total_amount=payload.total_amount,
+         )
+     )
+    return _to_order_response(order)
+
 
 @router.post("/{order_id}/cancel", response_model=OrderResponse, summary="取消订单")
 async def cancel_order(
@@ -97,14 +92,8 @@ async def cancel_order(
         handler: CancelOrderHandler = Depends(get_cancel_order_handler),
 ):
     '''取消当前登录用户自己的待处理订单'''
-    try:
-        order = await handler.handle(
-            CancelOrderCommand(order_id=order_id, user_id=current_user_id.value)
-        )
-        return _to_order_response(order)
-    except ConflictError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=e.message)
-    except NotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.message)
-    except DomainException as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
+    order = await handler.handle(
+        CancelOrderCommand(order_id=order_id, user_id=current_user_id.value)
+    )
+    return _to_order_response(order)
+

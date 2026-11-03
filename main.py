@@ -1,8 +1,11 @@
 '''fastapi应用入口'''
 from contextlib import asynccontextmanager
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI,Request
 from tortoise import Tortoise
+from fastapi.responses import JSONResponse
+
+from app.application.common.exception import NotFoundError, ConflictError, DomainException
 from app.interface.api.v1.order_router import router as order_router
 from app.interface.api.v1.auth_router import router as auth_router
 from config.settings import settings
@@ -23,6 +26,21 @@ async def close_database():
     '''关闭数据库连接'''
     await Tortoise.close_connections()
 
+def _install_exception_handlers(app: FastAPI) -> None:
+    '''集中翻译：业务异常 → HTTP 状态码（接口层唯一的翻译点）'''
+    @app.exception_handler(NotFoundError)
+    async def not_found_handler(request: Request, exc: NotFoundError):
+        return JSONResponse(status_code=404, content={"detail": exc.message})
+
+    @app.exception_handler(ConflictError)
+    async def conflict_handler(request: Request, exc: ConflictError):
+        return JSONResponse(status_code=409, content={"detail": exc.message})
+
+    @app.exception_handler(DomainException)
+    async def domain_handler(request: Request, exc: DomainException):
+        return JSONResponse(status_code=400, content={"detail": exc.message})
+
+
 def create_app()->FastAPI:
     '''创建fastapi实例'''
     app = FastAPI(
@@ -31,6 +49,7 @@ def create_app()->FastAPI:
         description="一个基于fastapi的DDD分层示例应用（JWT认证 + MySQL + aerich迁移）",
         lifespan=lifespan
     )
+    _install_exception_handlers(app)
     app.include_router(auth_router, prefix="/api/v1")
     app.include_router(order_router, prefix="/api/v1")
     return app
