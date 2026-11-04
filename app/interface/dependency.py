@@ -18,6 +18,9 @@ from app.application.common.token_service import TokenService
 from app.infrastructure.security.bcrypt_hasher import BcryptPasswordHasher
 from app.infrastructure.security.jwt_service import JwtTokenService
 from config.settings import settings
+from redis.asyncio import Redis
+from app.infrastructure.cache.redis_guard import RedisLoginAttemptGuard
+from app.application.common.login_guard import LoginAttemptGuard
 
 def get_password_hasher() -> PasswordHasher:
     '''获取密码哈希'''
@@ -44,13 +47,17 @@ def get_register_user_handler(
     '''获取注册用户处理器'''
     return RegisterUserHandler(user_repository, hasher)
 
+def get_login_attempt_guard() -> LoginAttemptGuard:
+    return RedisLoginAttemptGuard(Redis.from_url(settings.redis_url))
+
 def get_login_user_handler(
         user_repository: UserRepository=Depends(get_user_repository),
         hasher:PasswordHasher=Depends(get_password_hasher),
         token_service:TokenService=Depends(get_token_service),
+        guard:LoginAttemptGuard = Depends(get_login_attempt_guard),
         )->LoginUserHandler:
     '''获取登录用户处理器'''
-    return LoginUserHandler(user_repository,hasher,token_service)
+    return LoginUserHandler(user_repository,hasher,token_service,guard)
 
 def get_order_repository()->OrderRepository:
     '''获取订单仓储'''
@@ -73,4 +80,6 @@ def get_cancel_order_handler(
 ) -> CancelOrderHandler:
     '''获取取消订单处理器'''
     return CancelOrderHandler(order_repository)
+
+
 

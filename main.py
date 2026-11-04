@@ -5,7 +5,7 @@ from fastapi import FastAPI,Request
 from tortoise import Tortoise
 from fastapi.responses import JSONResponse
 
-from app.application.common.exception import NotFoundError, ConflictError, DomainException
+from app.application.common.exception import NotFoundError, ConflictError, DomainException, RateLimitError
 from app.interface.api.v1.order_router import router as order_router
 from app.interface.api.v1.auth_router import router as auth_router
 from config.settings import settings
@@ -39,6 +39,10 @@ def _install_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(DomainException)
     async def domain_handler(request: Request, exc: DomainException):
         return JSONResponse(status_code=400, content={"detail": exc.message})
+
+    @app.exception_handler(RateLimitError)
+    async def rate_limit_handler(request: Request, exc: RateLimitError):
+        return JSONResponse(status_code=429, content={"detail": exc.message})
 
 
 def create_app()->FastAPI:

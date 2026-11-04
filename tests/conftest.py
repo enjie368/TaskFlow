@@ -111,3 +111,41 @@ async def login_headers(client):
         return await _login_headers(client, username, password)
 
     return _make
+
+class FakeLoginAttemptGuard:
+    '''内存版登录守卫：用字典/set 模拟 Redis 的计数与锁。
+
+    为什么测试不用真 Redis？
+    1. 测试要"随时可跑"——不依赖 Docker 容器活着；
+    2. 限流的业务规则（错5次锁10分钟）和 Redis 无关，测规则就够了；
+    3. 这正是 dependency_overrides 的用武之地：生产给 Redis 版，测试给内存版，
+       Handler 一行不改——昨天"为什么不直接 new 实现"的答案在这里兑现。
+    '''
+    def __init__(self):
+        self.fails: dict = {}      # 用户名 -> 连续失败次数
+        self.locks: set = set()    # 被锁的用户名集合
+
+    async def ensure_allowed(self, username):
+        from app.application.common.exception import RateLimitError
+        if username in self.locks:
+            raise RateLimitError()
+
+    async def record_failure(self, username):
+        self.fails[username] = self.fails.get(username, 0) + 1
+        if self.fails[username] >= 5:
+            self.locks.add(username)
+
+    async def reset(self, username):
+        self.fails.pop(username, None)
+        self.locks.discard(username)
+
+
+@pytest_asyncio.fixture(autouse=True)
+def override_guard():
+    '''每个测试自动把真守卫换成全新的假守卫（函数级隔离，互不污染）'''
+    from app.interface.dependency import get_login_attempt_guard
+    fake = FakeLoginAttemptGuard()
+    app.dependency_overrides[get_login_attempt_guard] = lambda: fake
+    yield fake
+    app.dependency_overrides.pop(get_login_attempt_guard, None)
+

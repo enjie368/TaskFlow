@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     app_version: str="1.0.0"
     debug: bool=True
     #secret_key: str="secret"
+
+    #redis配置
+    redis_url: str = "redis://127.0.0.1:6379/0"
+
     #数据库配置
     db_url: str="sqlite://data/test.db"
     #jwt配置

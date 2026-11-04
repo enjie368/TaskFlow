@@ -37,3 +37,9 @@ class ConflictError(DomainException):
     '''资源状态冲突异常'''
     def __init__(self,message="资源当前状态不允许此操作"):
         super().__init__(message,"ConflictError")
+
+class RateLimitError(DomainException):
+    '''请求过于频繁异常'''
+    def __init__(self, message="尝试次数过多，请10分钟后再试"):
+        super().__init__(message, "RateLimitError")
+

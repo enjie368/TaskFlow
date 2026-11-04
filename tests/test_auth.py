@@ -118,3 +118,37 @@ async def test_me_with_invalid_token(client):
     resp = await client.get(ME, headers={"Authorization": "Bearer abc.def.ghi"})
 
     assert resp.status_code == 401
+
+async def test_login_locked_after_5_failures(client):
+    '''连续失败 5 次触发锁定：第 6 次【哪怕密码正确】也必须 429。
+
+    防的 bug：限流只挡"密码错的尝试"是不够的——攻击者试出密码后
+    依然能靠锁定期内的尝试暴力进入。锁定是对"这个用户名"的，不是对密码的。
+    429 = Too Many Requests，限流的标准状态码。
+    '''
+    await client.post(REGISTER, json={"username": "tom", "password": "pass1234"})
+    for _ in range(5):                                   # 错满 5 次 → 上锁
+        resp = await client.post(LOGIN, json={"username": "tom", "password": "wrong"})
+        assert resp.status_code == 400
+
+    resp = await client.post(LOGIN, json={"username": "tom", "password": "pass1234"})
+    assert resp.status_code == 429                       # 密码对也进不来
+
+
+async def test_login_reset_after_success(client):
+    '''登录成功清零计数：错 4 次后登录成功，计数从头再来。
+
+    防的 bug：如果成功后不清零，正常用户偶尔手滑几次就会被累计锁死。
+    验证方式：错4次 → 成功登录 → 再错1次只回 400（新计数的第一笔），
+    而不是 429（旧计数的第 5 笔）。
+    '''
+    await client.post(REGISTER, json={"username": "tom", "password": "pass1234"})
+    for _ in range(4):
+        await client.post(LOGIN, json={"username": "tom", "password": "wrong"})
+
+    resp = await client.post(LOGIN, json={"username": "tom", "password": "pass1234"})
+    assert resp.status_code == 200                       # 第 5 次用对密码，能进
+
+    resp = await client.post(LOGIN, json={"username": "tom", "password": "wrong"})
+    assert resp.status_code == 400                       # 只错这一次，不该触发限流
+

@@ -2,10 +2,9 @@
 认证和路由
 '''
 
-from fastapi import APIRouter, status, HTTPException,Depends
+from fastapi import APIRouter, status,Depends
 from pydantic import BaseModel
 
-from app.application.common.exception import DomainException
 from app.application.user.commands.login_user import LoginUserHandler, LoginUserCommand
 from app.application.user.commands.register_user import RegisterUserCommand,RegisterUserHandler
 from app.domain.shared.vo import UserID
