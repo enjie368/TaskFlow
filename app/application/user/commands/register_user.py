@@ -1,8 +1,10 @@
 from dataclasses import dataclass
-from app.application.common.exception import DuplicateError,ValidationError
+
+from app.application.common.exception import DuplicateError, ValidationError
 from app.domain.user.entity import User
-from app.domain.user.repository import UserRepository
 from app.domain.user.password_hasher import PasswordHasher
+from app.domain.user.repository import UserRepository
+
 
 @dataclass
 class RegisterUserCommand:

@@ -1,6 +1,7 @@
 '''登录尝试守卫——限流的抽象契约，不关心背后是 Redis 还是内存'''
 from abc import ABC, abstractmethod
 
+
 class LoginAttemptGuard(ABC):
     @abstractmethod
     async def ensure_allowed(self, username: str) -> None:

@@ -1,4 +1,3 @@
-from typing import Optional
 
 from app.domain.order.entity import Order
 from app.domain.order.repository import OrderRepository
@@ -23,7 +22,7 @@ class OrderRepositoryImpl(OrderRepository):
         await orm_model.save()
         return OrderMapper.to_entity(orm_model)
 
-    async def find_by_id_and_user_id(self, order_id: int, user_id: UserID) -> Optional[Order]:
+    async def find_by_id_and_user_id(self, order_id: int, user_id: UserID) -> Order | None:
         '''按 id 查订单，且必须属于该用户；不存在或不是本人的都返回 None'''
         orm_model = await OrderORM.get_or_none(id=order_id, user_id=user_id.value)
         if orm_model is None:

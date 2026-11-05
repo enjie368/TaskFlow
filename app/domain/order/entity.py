@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from enum import StrEnum
-from typing import Optional
 
 from ..shared.vo import UserID
 
@@ -22,7 +21,7 @@ class OrderStatusError(Exception):
 
 @dataclass
 class Order:
-    id: Optional[int]
+    id: int | None
     order_number: str
     user_id: UserID
     total_amount: Decimal

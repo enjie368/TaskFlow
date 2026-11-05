@@ -1,0 +1,9 @@
+# coverage 配置：把"按设计不被单测覆盖"的噪音排除，让数字反映真实盲区
+# 注意：exclude_lines 的值是正则，注释必须独占一行，不能写在值后面
+[report]
+exclude_lines =
+    pragma: no cover
+    @abstractmethod
+    if TYPE_CHECKING:
+    \.\.\.
+    raise NotImplementedError

@@ -1,7 +1,7 @@
 '''从 Authorization 头解析当前登录用户'''
 import jwt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.application.common.token_service import TokenService
 from app.domain.shared.vo import UserID
@@ -22,11 +22,11 @@ async def get_current_user_id(
         )
     try:
         payload = token_service.decode(credentials.credentials)
-    except jwt.ExpiredSignatureError:
+    except jwt.ExpiredSignatureError as e:
         raise HTTPException(status_code=401, detail="凭证已过期，请重新登录",
-                            headers={"WWW-Authenticate": "Bearer"})
-    except jwt.InvalidTokenError:
+                            headers={"WWW-Authenticate": "Bearer"}) from e
+    except jwt.InvalidTokenError as e:
         raise HTTPException(status_code=401, detail="凭证无效",
-                            headers={"WWW-Authenticate": "Bearer"})
+                            headers={"WWW-Authenticate": "Bearer"}) from e
 
     return UserID(int(payload["sub"]))

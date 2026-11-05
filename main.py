@@ -1,15 +1,22 @@
 '''fastapi应用入口'''
 from contextlib import asynccontextmanager
-import uvicorn
-from fastapi import FastAPI,Request
-from tortoise import Tortoise
-from fastapi.responses import JSONResponse
 
-from app.application.common.exception import NotFoundError, ConflictError, DomainException, RateLimitError
-from app.interface.api.v1.order_router import router as order_router
+import uvicorn
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from tortoise import Tortoise
+
+from app.application.common.exception import (
+    ConflictError,
+    DomainException,
+    NotFoundError,
+    RateLimitError,
+)
 from app.interface.api.v1.auth_router import router as auth_router
+from app.interface.api.v1.order_router import router as order_router
 from config.settings import settings
 from config.tortoise_config import TORTOISE_ORM
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -3,26 +3,27 @@
 '''
 
 from fastapi import Depends
+from redis.asyncio import Redis
 
+from app.application.common.login_guard import LoginAttemptGuard
+from app.application.common.order_query_cache import OrderQueryCache
+from app.application.common.token_service import TokenService
 from app.application.order.commands.cancel_order import CancelOrderHandler
 from app.application.order.commands.create_order import CreateOrderHandler
 from app.application.user.commands.login_user import LoginUserHandler
 from app.application.user.commands.register_user import RegisterUserHandler
 from app.application.user.queries.get_orders import GetOrdersHandler
 from app.domain.order.repository import OrderRepository
+from app.domain.user.password_hasher import PasswordHasher
 from app.domain.user.repository import UserRepository
+from app.infrastructure.cache.redis_guard import RedisLoginAttemptGuard
+from app.infrastructure.cache.redis_order_cache import RedisOrderQueryCache
 from app.infrastructure.repository.order_impl import OrderRepositoryImpl
 from app.infrastructure.repository.user_impl import UserRepositoryImpl
-from app.domain.user.password_hasher import PasswordHasher
-from app.application.common.token_service import TokenService
 from app.infrastructure.security.bcrypt_hasher import BcryptPasswordHasher
 from app.infrastructure.security.jwt_service import JwtTokenService
 from config.settings import settings
-from redis.asyncio import Redis
-from app.infrastructure.cache.redis_guard import RedisLoginAttemptGuard
-from app.application.common.login_guard import LoginAttemptGuard
-from app.infrastructure.cache.redis_order_cache import RedisOrderQueryCache
-from app.application.common.order_query_cache import OrderQueryCache
+
 
 def get_password_hasher() -> PasswordHasher:
     '''获取密码哈希'''

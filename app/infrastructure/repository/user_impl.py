@@ -1,4 +1,4 @@
-from typing import Optional
+
 from app.domain.shared.vo import UserID
 from app.domain.user.entity import User
 from app.domain.user.repository import UserRepository
@@ -14,14 +14,14 @@ class UserRepositoryImpl(UserRepository):
         await user_orm.save()
         return UserMapper.to_entity(user_orm)
 
-    async def find_by_id(self, user_id: UserID) -> Optional[User]:
+    async def find_by_id(self, user_id: UserID) -> User | None:
         '''通过id查找用户'''
         orm_model = await UserORM.get_or_none(id=user_id.value)
         if orm_model:
             return UserMapper.to_entity(orm_model)
         return None
 
-    async def find_by_name(self, name: str) -> Optional[User]:
+    async def find_by_name(self, name: str) -> User | None:
         '''通过姓名查找用户'''
         orm_model = await UserORM.get_or_none(username=name)
         if orm_model :

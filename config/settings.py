@@ -1,9 +1,10 @@
 '''
 应用配置管理
 '''
-from pydantic_settings import BaseSettings
-from pydantic import ConfigDict
 from pathlib import Path
+
+from pydantic import ConfigDict
+from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).resolve().parent.parent   # 项目根目录
 

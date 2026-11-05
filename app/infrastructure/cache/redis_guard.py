@@ -1,7 +1,8 @@
 '''Redis 版登录守卫'''
 from redis.asyncio import Redis
-from app.application.common.login_guard import LoginAttemptGuard
+
 from app.application.common.exception import RateLimitError
+from app.application.common.login_guard import LoginAttemptGuard
 
 MAX_ATTEMPTS = 5      # 连续失败阈值
 LOCK_SECONDS = 600    # 锁 10 分钟

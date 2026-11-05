@@ -3,6 +3,7 @@
 '''
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)#datacalss会自动实现__init__和__eq__，frozen=True使实例不可变
 class UserID:
     value: int

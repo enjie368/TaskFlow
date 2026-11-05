@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional
+
 from ..shared.vo import UserID
+
 
 @dataclass
 class User:
-    id: Optional[UserID]
+    id: UserID | None
     name: str
     password: str
 

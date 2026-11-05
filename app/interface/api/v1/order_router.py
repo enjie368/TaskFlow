@@ -1,17 +1,20 @@
 '''订单路由'''
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
-from pydantic import BaseModel, Field
-from fastapi import APIRouter,Depends,status,HTTPException,Query
-from app.application.common.exception import DomainException,ConflictError,NotFoundError
-from app.application.order.commands.cancel_order import CancelOrderHandler, CancelOrderCommand
-from app.application.order.commands.create_order import CreateOrderHandler, CreateOrderCommand
-from app.application.user.queries.get_orders import GetOrdersQuery, GetOrdersHandler
-from app.interface.dependency import get_order_handler, get_create_order_handler, get_cancel_order_handler
-from app.domain.shared.vo import UserID
-from app.interface.security import get_current_user_id
 
+from fastapi import APIRouter, Depends, Query, status
+from pydantic import BaseModel, Field
+
+from app.application.order.commands.cancel_order import CancelOrderCommand, CancelOrderHandler
+from app.application.order.commands.create_order import CreateOrderCommand, CreateOrderHandler
+from app.application.user.queries.get_orders import GetOrdersHandler, GetOrdersQuery
+from app.domain.shared.vo import UserID
+from app.interface.dependency import (
+    get_cancel_order_handler,
+    get_create_order_handler,
+    get_order_handler,
+)
+from app.interface.security import get_current_user_id
 
 router = APIRouter(prefix="/orders", tags=["订单"])
 
@@ -26,7 +29,7 @@ class OrderResponse(BaseModel):
 
 class GetOrdersResponse(BaseModel):
     '''获取订单响应'''
-    orders: List[OrderResponse]
+    orders: list[OrderResponse]
     total: int
     limit: int
     offset: int
@@ -52,8 +55,8 @@ def _to_order_response(order) -> OrderResponse:
 
 @router.get("/", response_model=GetOrdersResponse,summary="查询我的订单")
 async def get_orders(
-        limit:Optional[int]=Query(10,ge=1,le=100,description="每页数量"),
-        offset:Optional[int]=Query(0,ge=0,description="偏移量"),
+        limit:int | None=Query(10,ge=1,le=100,description="每页数量"),
+        offset:int | None=Query(0,ge=0,description="偏移量"),
         current_user_id: UserID = Depends(get_current_user_id),
         handler:GetOrdersHandler=Depends(get_order_handler)
 ):

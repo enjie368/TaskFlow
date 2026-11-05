@@ -1,5 +1,7 @@
 import datetime
+
 import jwt
+
 from app.application.common.token_service import TokenService
 
 
@@ -10,7 +12,7 @@ class JwtTokenService(TokenService):
         self.expire_minutes = expire_minutes
 
     def create_access_token(self, user_id: int, username: str) -> tuple[str, int]:
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = datetime.datetime.now(datetime.UTC)
         expire = now + datetime.timedelta(minutes=self.expire_minutes)
         payload = {
             "sub": str(user_id),

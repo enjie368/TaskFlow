@@ -1,0 +1,14 @@
+# ruff 配置：规则集务实优先——抓真问题，不跟风格较劲
+line-length = 100
+target-version = "py313"
+
+[lint]
+# E4/E7/E9 语法与缩进硬错误；F 真问题（未用导入/未定义变量）；
+# I 导入排序（自动修）；UP 过时写法升级（自动修）；B 常见逻辑陷阱
+select = ["E4", "E7", "E9", "F", "I", "UP", "B"]
+ignore = [
+    "B008",  # FastAPI 惯用法：Depends(...) 作为参数默认值，全行业标准写法
+]
+
+[lint.per-file-ignores]
+"tests/**" = ["RUF012"]  # 测试替身的类属性不需要 immutable 校验

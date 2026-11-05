@@ -21,6 +21,11 @@ data/
 *.db
 *.sqlite3
 
+# ===== 测试与覆盖率产物 =====
+.coverage
+htmlcov/
+.pytest_cache/
+
 # ===== IDE =====
 .idea/
 .vscode/

@@ -2,13 +2,13 @@
 认证和路由
 '''
 
-from fastapi import APIRouter, status,Depends
+from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel
 
-from app.application.user.commands.login_user import LoginUserHandler, LoginUserCommand
-from app.application.user.commands.register_user import RegisterUserCommand,RegisterUserHandler
+from app.application.user.commands.login_user import LoginUserCommand, LoginUserHandler
+from app.application.user.commands.register_user import RegisterUserCommand, RegisterUserHandler
 from app.domain.shared.vo import UserID
-from app.interface.dependency import get_register_user_handler, get_login_user_handler
+from app.interface.dependency import get_login_user_handler, get_register_user_handler
 from app.interface.security import get_current_user_id
 
 router = APIRouter(prefix="/auth", tags=["认证"])

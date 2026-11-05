@@ -2,13 +2,11 @@
 通用业务异常
 '''
 
-from typing import Optional
-
 
 
 class DomainException(Exception):
     '''业务异常'''
-    def __init__(self, message:str,code:Optional[str]=None) -> None:
+    def __init__(self, message:str,code:str | None=None) -> None:
         self.message = message
         self.code = code
         super().__init__(message)

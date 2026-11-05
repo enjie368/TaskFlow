@@ -29,7 +29,7 @@ class CancelOrderHandler:
         try:
             order.cancel()
         except OrderStatusError as e:
-            raise ConflictError(str(e))
+            raise ConflictError(str(e)) from e
 
         await self.cache.invalidate(command.user_id)   # 写后失效：版本+1，旧列表缓存全部作废
 

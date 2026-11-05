@@ -4,7 +4,6 @@
 import datetime
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import List
 
 from app.application.common.exception import ValidationError
 from app.application.common.order_query_cache import OrderQueryCache
@@ -33,7 +32,7 @@ class OrderDTO:
 class GetOrdersResult:
     """获取用户订单结果"""
     total: int
-    orders: List[OrderDTO]
+    orders: list[OrderDTO]
 
 class GetOrdersHandler:
     '''获取订单查询处理器'''

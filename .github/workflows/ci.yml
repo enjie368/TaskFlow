@@ -1,0 +1,30 @@
+# GitHub Actions CI：每次 push / PR 自动跑 代码检查 + 全量测试
+# 跑在 GitHub 免费提供的干净 Linux 容器里，与本地环境无关
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python 3.13（并缓存 pip 依赖）
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: ruff 代码检查
+        run: ruff check .
+
+      - name: 运行全量测试（带覆盖率）
+        run: pytest --cov=app --cov-report=term-missing
