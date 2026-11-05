@@ -1,0 +1,57 @@
+# ===== docker-compose.yml：一条命令拉起 应用 + MySQL + Redis 三件套 =====
+# 启动：docker compose up -d --build
+# 停止：docker compose down        （加 -v 连数据卷一起删，慎用）
+# 日志：docker compose logs -f app
+
+# 变量替换说明：${MYSQL_ROOT_PASSWORD} 这类写法会自动从项目根目录的 .env 读值，
+# 所以密钥依然只存在 .env 一处，compose 文件本身可以安全提交到仓库。
+
+services:
+  # ---------- 应用容器（用上面 Dockerfile 构建的镜像）----------
+  app:
+    build: .
+    ports:
+      - "8000:8000"          # 宿主机8000 -> 容器8000，浏览器访问 http://localhost:8000/docs
+    environment:             # 运行时注入密钥与连接串（覆盖/替代 .env 文件）
+      DB_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/taskflow
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      mysql:
+        condition: service_healthy   # 等 MySQL 真正"能接受连接"才启动 app
+      redis:
+        condition: service_started
+    # 容器内启动顺序：先跑 aerich 迁移建表，成功后再起 uvicorn
+    # （新库是空的，不迁移就没有任何表，接口会全部报错）
+    command: >
+      sh -c "until aerich upgrade; do
+               echo '等待 MySQL 就绪，2 秒后重试...'; sleep 2;
+             done &&
+             uvicorn main:app --host 0.0.0.0 --port 8000"
+    restart: unless-stopped
+
+  # ---------- MySQL 8（首次启动自动创建 taskflow 库）----------
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: taskflow
+    volumes:
+      - mysql_data:/var/lib/mysql   # 数据落在命名卷里，容器删了数据还在
+    # 健康检查：让 depends_on 等"真正可用"而不是"进程启动了"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    # 故意不映射 3306 到宿主机：你本机已装 MySQL 占着 3306，
+    # 容器里的 MySQL 只在 compose 内网用，需要查看数据时用 docker exec
+
+  # ---------- Redis 7（限流计数 + 订单缓存）----------
+  redis:
+    image: redis:7-alpine
+    # 同样不映射宿主机端口：你之前的 taskflow-redis 容器占着 6379，
+    # compose 内部通过主机名 redis 直连，不需要宿主机端口
+
+volumes:
+  mysql_data:

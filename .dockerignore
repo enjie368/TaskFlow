@@ -1,0 +1,37 @@
+# ===== 构建镜像时不要塞进去的东西 =====
+# 原则：镜像里只放"运行应用必需"的文件，越小越好、越干净越安全
+
+# 版本控制与 CI（仓库历史几百 MB，运行时完全用不到）
+.git
+.github
+
+# Python 产物
+__pycache__
+*.py[cod]
+.pytest_cache
+.coverage
+htmlcov
+
+# 测试（镜像里不跑测试，CI 已经负责了）
+tests
+ruff.toml
+.coveragerc
+
+# 本地数据与虚拟环境
+data
+.venv
+venv
+
+# IDE
+.idea
+.vscode
+
+# 【安全红线】.env 里有 JWT_SECRET 和数据库密码，
+# 绝不能烧进镜像 —— 镜像可能被导出/上传，密钥就泄露了。
+# 容器的密钥一律由 docker-compose 的 environment 在"运行时"注入。
+.env
+
+# Docker 自身文件
+Dockerfile
+docker-compose.yml
+.dockerignore
