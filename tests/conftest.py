@@ -149,3 +149,30 @@ def override_guard():
     yield fake
     app.dependency_overrides.pop(get_login_attempt_guard, None)
 
+class NullOrderQueryCache:
+    '''空操作缓存：永远未命中、保存和失效都是空操作。
+
+    测试不需要 Redis 也能跑；同时验证了"缓存是透明的"——
+    换成这个假货，22 条既有测试应该一条都不变绿照旧。
+    '''
+    async def get(self, user_id, limit, offset):
+        '''永远未命中 → Handler 每次都走真实查库路径'''
+        return None
+
+    async def save(self, user_id, limit, offset, result):
+        '''不存（测试环境无需缓存）'''
+
+    async def invalidate(self, user_id):
+        '''不失效（没存过自然无需失效）'''
+
+
+@pytest_asyncio.fixture(autouse=True)
+def override_cache():
+    '''每个测试自动把 Redis 缓存换成空操作版（函数级隔离）'''
+    from app.interface.dependency import get_order_query_cache
+    fake = NullOrderQueryCache()
+    app.dependency_overrides[get_order_query_cache] = lambda: fake
+    yield fake
+    app.dependency_overrides.pop(get_order_query_cache, None)
+
+

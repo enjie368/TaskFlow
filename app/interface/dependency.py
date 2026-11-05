@@ -21,6 +21,8 @@ from config.settings import settings
 from redis.asyncio import Redis
 from app.infrastructure.cache.redis_guard import RedisLoginAttemptGuard
 from app.application.common.login_guard import LoginAttemptGuard
+from app.infrastructure.cache.redis_order_cache import RedisOrderQueryCache
+from app.application.common.order_query_cache import OrderQueryCache
 
 def get_password_hasher() -> PasswordHasher:
     '''获取密码哈希'''
@@ -48,7 +50,11 @@ def get_register_user_handler(
     return RegisterUserHandler(user_repository, hasher)
 
 def get_login_attempt_guard() -> LoginAttemptGuard:
-    return RedisLoginAttemptGuard(Redis.from_url(settings.redis_url))
+    return RedisLoginAttemptGuard(Redis.from_url(settings.redis_url,decode_responses=True),)
+
+def get_order_query_cache() -> OrderQueryCache:
+    '''获取订单查询缓存（Redis 版）'''
+    return RedisOrderQueryCache(Redis.from_url(settings.redis_url,decode_responses=True),)
 
 def get_login_user_handler(
         user_repository: UserRepository=Depends(get_user_repository),
@@ -64,22 +70,26 @@ def get_order_repository()->OrderRepository:
     return OrderRepositoryImpl()
 
 def get_order_handler(
-    order_repository: OrderRepository = Depends(get_order_repository)
+    order_repository: OrderRepository = Depends(get_order_repository),
+    cache: OrderQueryCache = Depends(get_order_query_cache),
 )->GetOrdersHandler:
     '''获取订单处理器'''
-    return GetOrdersHandler(order_repository)
+    return GetOrdersHandler(order_repository,cache)
 
 def get_create_order_handler(
     order_repository: OrderRepository = Depends(get_order_repository),
+    cache: OrderQueryCache = Depends(get_order_query_cache),
 ) -> CreateOrderHandler:
     '''获取创建订单处理器'''
-    return CreateOrderHandler(order_repository)
+    return CreateOrderHandler(order_repository,cache)
 
 def get_cancel_order_handler(
     order_repository: OrderRepository = Depends(get_order_repository),
+    cache: OrderQueryCache = Depends(get_order_query_cache),
 ) -> CancelOrderHandler:
     '''获取取消订单处理器'''
-    return CancelOrderHandler(order_repository)
+    return CancelOrderHandler(order_repository,cache)
+
 
 
 
