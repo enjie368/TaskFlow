@@ -18,7 +18,8 @@ WORKDIR /app
 # 只要 requirements.txt 没变，重新 build 时这一层直接用缓存，
 # 哪怕业务代码天天改也不用重装几百 MB 的依赖 —— 这是 Dockerfile 最重要的顺序技巧
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# -i 清华镜像源：国内服务器/CI 直连 pypi.org 龟速甚至超时，换国内源构建从 6 分钟降到 40 秒
+RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 
 # 再复制业务代码（.dockerignore 会排除 .git/测试/__pycache__ 等）
 COPY . .
